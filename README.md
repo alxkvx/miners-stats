@@ -1,9 +1,16 @@
-# miners-stats
+# Miners Stats
 This is simple php page that collects stats from miners and shows it on single page.
 
 ![alt text](https://raw.githubusercontent.com/alxkvx/miners-stats/master/miners.JPG)
 ![alt text](https://raw.githubusercontent.com/alxkvx/miners-stats/master/miner_info.JPG)
 ![alt text](https://raw.githubusercontent.com/alxkvx/miners-stats/master/rigs.JPG)
+
+## Supported Miners:
+- Antminer S9
+- Antminer L3+
+- Avalon 841
+- Rigs with claymore/phoeninx miners
+
 ## Requirements:
 - Linux or windows pc/laptop/raspberryPi/server/VM on the same network with miners
 - running web server: apache/nginx etc.
