@@ -18,7 +18,7 @@ change owner of files to Apache user:
 ```
 root@raspberrypi:/var/www/html# chown -R www-data.www-data miners-stats/
 ```
-Add your miners using "ADD" button on the page.
+Add your miners using **ADD** button on the page.
 
 ## Access:
 http://<machine_IP>/miners-stats/s9.php  
@@ -26,4 +26,4 @@ http://<machine_IP>/miners-stats/l3.php
 http://<machine_IP>/miners-stats/rigs.php  
 http://<machine_IP>/miners-stats/avalons.php
 
-#### Enjoy!
+## Enjoy!
