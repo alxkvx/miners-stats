@@ -1,4 +1,4 @@
-## miners-stats
+# miners-stats
 This is simple php page that collects stats from miners and shows it on single page.
 
 ![alt text](https://raw.githubusercontent.com/alxkvx/miners-stats/master/miners.JPG)
@@ -19,6 +19,7 @@ change owner of files to Apache user:
 root@raspberrypi:/var/www/html# chown -R www-data.www-data miners-stats/
 ```
 Add your miners using "ADD" button on the page.
+###Enjoy
 
 ## Access:
 http://<machine_IP>/miners-stats/s9.php
@@ -26,5 +27,6 @@ http://<machine_IP>/miners-stats/s9.php
 http://<machine_IP>/miners-stats/l3.php
 
 http://<machine_IP>/miners-stats/rigs.php
+
 http://<machine_IP>/miners-stats/avalons.php
 
