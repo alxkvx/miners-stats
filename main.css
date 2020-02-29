@@ -1,0 +1,135 @@
+a{
+	text-decoration: none;
+	color:           #00ddc5;
+}
+body {
+	background-color: black;
+	color: white;
+	margin-top: 4px;
+}
+table {
+	font-size: 14px;
+}
+table#ctgreen td {
+	width: 50px;
+	height: 50px;
+	text-align: center;
+}
+tr:hover { background-color: rgba(255, 0, 0, 0.3);}
+input {
+	margin-bottom: 0;
+	margin-top: 0;
+}
+#scanerdiv {display: none; }
+#grestart, #restartminer, #edit, #config, #editclose, #confclose, .pooldisable, .poolenable, .pooldel, .poolprio  {
+	color: #00ddc5;
+	cursor: pointer;
+}
+#editclose, #confclose {
+	position: relative;
+	left: 1380px;
+	background: red;
+	width: 20px;
+	text-align: center;
+}
+#divedit, #divconf {
+	position: absolute;
+	background: #20202b;
+	display: none;
+	left: 100px;
+	top: 50px;
+	height: 400px;
+	width: 1400px;
+	z-index: 100;
+}
+#editfld {
+	position: relative;
+	left: 200px;
+	top: 100px;
+}
+.reload {
+	cursor:pointer;
+}
+.hwred {
+	color: #ed5550;
+}
+.bold {
+	font-weight: bold;
+}
+.head {
+	font-weight: bold;
+	text-align: center;
+}
+.zero { padding-left: 12px; }
+.total {font-weight: bold;}
+.rowhiglt { background-color: #b100ae70;}
+.red { background-color: red; font-weight: bold;}
+.amd { background-color: #da003c; font-weight: bold;}
+.badred { background-color: #af0000;}
+.fred { color: red; font-weight: bold;}
+.dred { color: red; font-weight: bold;}
+.fgreen { color: #23f223; font-weight: bold;}
+.fyellow { color: #ffff05; }
+.dgreen { color: green; font-weight: bold;}
+.greenlight { background-color: #06e910; color: #000;font-weight: bold;}
+.green { background-color: green;}
+.yellow { background-color: #ffff05; color: #000;}
+.orange { background-color: #d85f07;}
+.forange { color: #ff6b00;}
+.fblue { color: #33f9f9;}
+.blue { background-color: #0a64c8;}
+.fiol { background-color: #8d029c;}
+.highfiol { background-color: #e600ff;}
+.ffiol {color: #e944fb; font-weight: bold;}
+.fontgreen {color: #23f223;}
+.fontblue {color: #06eef6;}
+.fontyell {color: #ffff05;}
+.box {
+	position: relative;
+	display: inline-block;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-bottom: 1px;
+	border-radius: 4px 4px 4px 4px;
+	margin-right: 2px;
+	margin-left: 2px;
+
+}
+.asics {
+	padding-left: 300px;
+}
+.btcnavbar {
+	display: inline-block;
+	margin-right: 15px;
+	
+}
+
+.btcnavbar img {
+	margin-top: -4px;
+	margin-right: -5px;
+	vertical-align: middle;
+}
+.tdprofit img {
+        margin-top: -4px;
+        vertical-align: middle;
+}
+.tickers {
+	position: relative;
+	margin-bottom: 3px;
+	left: 200px;
+	width: 800px;
+	font-family: SFMono-Regular,Menlo,Monaco,Consolas,liberation mono,courier new,monospace;
+}
+#pools {
+	display: block;
+	position: absolute;
+	top: 40px;
+	left: 1150px;
+}
+.gpus {
+	border-radius: 5px;
+	background-color: #303235;
+	color: white;
+	border: 0px solid white;
+	text-align: center;
+}
