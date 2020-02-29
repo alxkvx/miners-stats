@@ -5,6 +5,14 @@ This is simple php page that collects stats from miners and shows it on single p
 ![alt text](https://raw.githubusercontent.com/alxkvx/miners-stats/master/miner_info.JPG)
 ![alt text](https://raw.githubusercontent.com/alxkvx/miners-stats/master/rigs.JPG)
 
+## Features:
+- Shows all miners stats on sinle page
+- Miner restart
+- Miner detailed info
+- Change/Add/Remove pools on fly
+- Change miner config: Freq/Volt/Pools (Braiins OS only)
+- Mass actions: (change pools/config, restart, delete)
+
 ## Supported Miners:
 - Antminer S9
 - Antminer L3+
