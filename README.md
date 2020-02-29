@@ -20,7 +20,7 @@ root@raspberrypi:/var/www/html# chown -R www-data.www-data miners-stats/
 ```
 Add your miners using "ADD" button on the page.
 
-##Enjoy!
+#### Enjoy!
 
 ## Access:
 http://<machine_IP>/miners-stats/s9.php
