@@ -3,6 +3,7 @@
 $jsfile = 'json/s9.json';
 $l3jsfile = 'json/l3.json';
 $rigfile = 'json/rig.json';
+$avalonfile = 'json/avalon.json';
 
 $id   = $_GET['id'];
 $type = $_GET['type'];
@@ -19,6 +20,10 @@ else if ($type == 's9')	{
 }
 else if ($type == 'rig') {
 	$file = $rigfile;
+	$a = json_decode(file_get_contents($file),true);
+}
+else if ($type == 'avalon') {
+	$file = $avalonfile;
 	$a = json_decode(file_get_contents($file),true);
 }
 else {
@@ -47,6 +52,16 @@ if ($type) {
 			GPU Type: '.$a[$id]['gputype'].' <br>
 			MEM Type: '.$a[$id]['memtype'].' <br>
 			GPUs: '.$a[$id]['gpusnum'].' <br>';
+		}
+		elseif ($type == 'avalon') {
+			$a[$id]['id'] = $id;
+			$a[$id]['ip'] = $_GET['ip'];
+			$a[$id]['groups'] = $_GET['groups'];
+
+			$html.='<br><br>File: '.$file.'<br> 
+			ID: '.$a[$id]['id'].'<br> 
+			IP: '.$a[$id]['ip'].'<br>
+			Groups: '.$a[$id]['groups'].'<br>';
 		}
 		else {
 

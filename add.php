@@ -15,12 +15,25 @@ if ($type == 'rig') {
     <tr>
         <td>ID: <input type=text name=rigid value="" size=3></td>
         <td>Name: <input type=text name=rigname value="" size=3></td>
-        <td>IP: <input type=text name=ip value="" size=8></td>
+        <td>IP: <input type=text name=ip value="" size=10></td>
         <td>Port: <input type=text name=port value="" size=5></td>
         <td>GPU Type: <input type=text name=gputype value="" size=5></td>
         <td>Memory Type: <input type=text name=memtype value="" size=1></td>
         <td>GPUs number: <input type=text name=gpusnum value="" size=1></td>
         <td><input id="addrig" type=submit value="ADD"></td>
+    </tr>
+    </table>
+    </div>';
+}
+else if ($type == 'avalon') {
+    $html .= '
+    <div id="singavalondiv">
+    <table border=0 cellspacing=0 cellpadding=3>
+    <tr>
+        <td>ID: <input type=text name=avalonid value="" size=3></td>
+        <td>IP: <input type=text name=ip value="" size=10></td>
+        <td>Groups Number: <input type=text name=groups value="" size=3></td>
+        <td><input id="addavalon" type=submit value="ADD"></td>
     </tr>
     </table>
     </div>';
@@ -31,7 +44,7 @@ else {
     <table border=0 cellspacing=0 cellpadding=3>
     <tr>
         <td>ID: <input type=text name=id value="" size=3></td>
-        <td>IP: <input type=text name=ip value="" size=8></td>
+        <td>IP: <input type=text name=ip value="" size=10></td>
         <td>Model: <input type=text name=model value="" size=5></td>
         <td>Fan check: <input type=text name=fanck value="" size=1></td>
         <td>Fan mode: <input type=text name=fanmod value="" size=1></td>

@@ -2,16 +2,10 @@
 
 $start = microtime(true);
 
-$avalon = array(
-	        '192.168.11.99',
-	);
+$avalon = json_decode(file_get_contents('json/avalon.json'),true);
 
 $avalonnum = count($avalon);
-
 $totalhashrate = 0;
-
-$html = '<link href="main.css" type="text/css" rel="stylesheet"/>';
-$html .= "<body><table border=0 cellspacing=0 cellpadding=4><tr class=head><td>ID</td><td>Name</td><td>IP</td><td>Pool</td><td>Worker</td><td>ID</td><td>Diff</td><td>Works</td><td>LS time</td><td>Block</td><td>Uptime</td><td>Fans</td><td>Freq</td><td>TH 5s</td><td>HW</td><td>Reject</td><td>AUC Temp</td><td>Chip Temp</td></tr>";
 
 function get_api($ip,$command) {
 		
@@ -30,8 +24,11 @@ function get_api($ip,$command) {
 	return $json;
 }
 
-function miner_details($ip) {
-		
+function miner_details($x) {
+
+    $id = $x['id'];
+    $ip = $x['ip'];
+    $groups = $x['groups'];
 	$json = get_api($ip,'summary');
 			
 	$getworks       = number_format($json['SUMMARY'][0]['Getworks']);
@@ -65,14 +62,14 @@ function miner_details($ip) {
 	$pool2_lstime   = $json['POOLS'][2]['Last Share Time'];
 
 	$json = get_api($ip,'stats');
-	$html = '';
 	$avnum =0;
 	$ths =0;
+    $htm = '';
 
-	for ($i=0; $i<2; $i++) {
+	for ($i=0; $i<$groups; $i++) {
 		$setname        = $json['STATS'][$i]['ID'];
 		$auc_temp       = $json['STATS'][$i]['AUC Temperature'];
-			
+
 		for ($x=0; $x<5; $x++) {
 			$z = $x+1;
 			$avid = "MM ID$z";
@@ -107,7 +104,8 @@ function miner_details($ip) {
 			else if ($fan<3500) { $fan1cl = 'blue'; }
 			$ths += $ghs5s;
 			$avnum +=1;
-			$html .= "<tr>
+			$htm .= "<tr>
+                <td>$id</td>
 				<td>$setname</td>
 				<td>$name</td>
 				<td>$ip</td>
@@ -128,28 +126,25 @@ function miner_details($ip) {
 				<td><span class=\"box $ccl0\">$ctemp0</span></td></tr>";
 		}
 	}
-	return array($ths,$html,$avnum);
+	return array($ths,$htm,$avnum);
 }
 
+$html = '<link href="main.css" type="text/css" rel="stylesheet"/><head><title>Avalons</title></head>';
+$html .= "<body><table border=0 cellspacing=0 cellpadding=4><tr class=head><td>ID</td><td>Group ID</td><td>Name</td><td>IP</td><td>Pool</td><td>Worker</td><td>ID</td><td>Diff</td><td>Works</td><td>LS time</td><td>Block</td><td>Uptime</td><td>Fans</td><td>Freq</td><td>TH 5s</td><td>HW</td><td>Reject</td><td>AUC Temp</td><td>Chip Temp</td></tr>";
 
-for($x = 0; $x < $avalonnum; $x++) {
+foreach($avalon as $x) {
 
-	$vars = miner_details($avalon[$x]);
+	$vars = miner_details($x);
 	$totalhashrate += $vars[0];
 	$html .= $vars[1];
 	$avalons = $vars[2];
 }
 
 $totalhashrate = number_format($totalhashrate);
-$html .= "</table><br>Total: ". $avalons . " miners" . " / " . $totalhashrate . " Th<br><br>";
+$html .= "<tr><td colspan=2><span class=\"box fiol\"><a href=\"add.php?type=avalon\" target=\"_blank\">ADD</a></span></td></tr></table><br>Total: ". $avalons . " miners" . " / " . $totalhashrate . " Th<br><br>";
 
 $exec_time = round(microtime(true) - $start, 3);
 $html .=  "<br><br>Load time: " . $exec_time . " sec (" . date('Y-m-d H:i:s') .")";
 $html .=  "</body>";
 
 print $html;
-
-?>
-
-
-

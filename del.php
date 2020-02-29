@@ -1,8 +1,6 @@
 <?php
 
-$jsfile = 'json/s9list.json';
-$jsfileand = 'json/s9and.json';
-$jsfilegrg = 'json/s9georg.json';
+$jsfile = 'json/s9.json';
 
 $s9  = json_decode(file_get_contents($jsfile),true);
 $s9and = json_decode(file_get_contents($jsfileand),true);

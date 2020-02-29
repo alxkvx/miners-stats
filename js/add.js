@@ -50,6 +50,15 @@ $(document).ready(function() {
 			$('body').append(data);
 		});
 	});
+	$("#addavalon").click(function(){
+		var id = $('[name=avalonid]').val(),
+			ip = $('[name=ip]').val(),
+			groups = $('[name=groups]').val(),
+			url = 'addsave.php?type=avalon&ip='+ip+'&id='+id+'&groups='+groups;
+		$.get(url, function(data){
+			$('body').append(data);
+		});
+	});
 	$("body").on('click','#all', function(){
 		$('input:checkbox').not(this).prop('checked', this.checked);
 	});
