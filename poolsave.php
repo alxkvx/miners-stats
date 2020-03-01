@@ -8,8 +8,10 @@ $user[0] = $_GET['user0'];
 $user[1] = $_GET['user1'];
 $user[2] = $_GET['user2'];
 
+$ssh_passwd = '123';
+
 $connection = ssh2_connect($ip, 22);
-ssh2_auth_password($connection, 'root', '1qazXsw2');
+ssh2_auth_password($connection, 'root', $ssh_passwd);
 ssh2_scp_recv($connection, '/etc/cgminer.conf', 'cgminer_recv.conf');
 
 $conf = json_decode(file_get_contents('cgminer_recv.conf'),true);

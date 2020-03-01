@@ -3,6 +3,8 @@
 $jsfile = 'json/s9.json';
 $l3jsfile = 'json/l3.json';
 
+$ssh_passwd = '123';
+
 $id   	= $_GET['id'];
 $type   = $_GET['type'];
 $pool[0] = $_GET['pool0'];
@@ -111,7 +113,7 @@ if ($type) {
 		if ($loadfreq == 'true' && ($json==0 || $json==1)) { echo "miner $id down"; }
 		else {
 			$connection = ssh2_connect($ip, 22);
-			ssh2_auth_password($connection, 'root', '1qazXsw2');
+			ssh2_auth_password($connection, 'root', $ssh_passwd);
 			ssh2_scp_send($connection, 'cgminer.conf', '/etc/cgminer.conf', 0644);
 			$html.= "Config uploaded!";
 		}

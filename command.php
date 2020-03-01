@@ -28,12 +28,14 @@ $opt 	= $_GET['opt'];
 $url 	= $_GET['url'];
 $user 	= $_GET['user'];
 
+$ssh_passwd = '123';
+
 if ($command=='addpool') {
 	api($ip,$command,"$url,$user,1");
 }
 else if ($command=='restartminer') {
 	$connection = ssh2_connect($ip, 22);
-	ssh2_auth_password($connection, 'root', '1qazXsw2');
+	ssh2_auth_password($connection, 'root', $ssh_passwd);
 	ssh2_exec($connection, '/etc/init.d/cgminer restart');
 	echo "$ip miner restarted";
 }
