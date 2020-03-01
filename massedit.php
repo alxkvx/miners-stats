@@ -3,8 +3,8 @@
 error_reporting(E_ERROR | E_PARSE);
 $start = microtime(true);
 
-$s9 = json_decode(file_get_contents('json/s9list.json'),true);
-$l3 = json_decode(file_get_contents('json/l3list.json'),true);
+$s9 = json_decode(file_get_contents('json/s9.json'),true);
+$l3 = json_decode(file_get_contents('json/l3.json'),true);
 
 $s9num = count($s9);
 $l3num = count($l3);
@@ -410,5 +410,3 @@ $html .=  "<br>Load time: " . $exec_time . " sec (" . date('Y-m-d H:i:s') .")";
 $html .=  "</body>";
 
 print $html;
-
-?>
