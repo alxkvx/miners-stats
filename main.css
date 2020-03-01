@@ -1,6 +1,7 @@
 a{
 	text-decoration: none;
 	color:           #00ddc5;
+	cursor: pointer;
 }
 body {
 	background-color: black;
@@ -27,6 +28,9 @@ input {
 }
 #summarytbl td {
 	padding: 10px;
+}
+#summarytbl tr:last-child td {
+	border-top: 1px solid white;
 }
 #scanerdiv {display: none; }
 #grestart, #restartminer, #edit, #config, #editclose, #confclose, .pooldisable, .poolenable, .pooldel, .poolprio  {
@@ -138,6 +142,6 @@ input {
 	border-radius: 5px;
 	background-color: #303235;
 	color: white;
-	border: 0px solid white;
+	border: 0 solid white;
 	text-align: center;
 }

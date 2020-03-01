@@ -18,7 +18,6 @@ function get_api($ip,$command) {
 	$buff = substr($buffer,0,strlen($buffer)-1);
 	$buff = preg_replace('/}{/','},{',$buff);
 	$buff = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $buff);
-	#print $buff . '<br><br>';
 	if (!json_decode($buff)) {$html .= "BAD json, error: " . json_last_error();}
 	else { $json = json_decode($buff,true);}
 	return $json;

@@ -3,6 +3,7 @@
 $s9 = json_decode(file_get_contents('json/s9.json'),true);
 $l3 = json_decode(file_get_contents('json/l3.json'),true);
 $rig = json_decode(file_get_contents('json/rig.json'),true);
+$avalon = json_decode(file_get_contents('json/avalon.json'),true);
 
 function api($ip,$command) {
 
@@ -84,6 +85,7 @@ function miner_details($type,$arr) {
 $s9all = count($s9);
 $l3all = count($l3);
 $rigall = count($rig);
+$avalonall = count($avalon);
 
 $s9hash = 0;
 $s9temp = 0;
@@ -116,9 +118,48 @@ foreach($l3 as $x) {
 	$state	= $vars[0];
 	$l3hash+= $vars[1];
 	$l3temp+= $vars[2];
-	if ($state == 0) { $l3off+= 1; }
-	else if ($state == 1) { $l3ssh+= 1; }
-	else if ($state == 2) { $l3on+= 1; }
+	if ($state == 0) { $l3off++; }
+	else if ($state == 1) { $l3ssh++; }
+	else if ($state == 2) { $l3on++; }
+}
+
+$avalonhash = 0;
+$avalontemp = 0;
+$avalonon = 0;
+$avalonoff = 0;
+
+foreach($avalon as $x) {
+
+	$id = $x['id'];
+	$ip = $x['ip'];
+	$groups = $x['groups'];
+
+	$json = api($ip,'stats');
+
+	if	 ($json == 0) {
+		$avalonoff++;
+	}
+	else {
+
+		for ($i = 0; $i < $groups; $i++) {
+
+			for ($x = 0; $x < 5; $x++) {
+				$z = $x + 1;
+				$avid = "MM ID$z";
+				$avset[$x] = $json['STATS'][$i][$avid];
+				if (!$avset[$x]) {
+					continue;
+				}
+				$arr = explode(" ", $avset[$x]);
+				$ctemp0 = preg_replace("/Temp\[(.*)\]/", "\$1", $arr[13]);
+				$ghs5s = preg_replace("/GHSmm\[(.*)\]/", "\$1", $arr[25]);
+
+				$avalonhash += $ghs5s;
+				$avalontemp += $ctemp0;
+				$avalonon++;
+			}
+		}
+	}
 }
 
 $righash = 0;
@@ -210,14 +251,78 @@ $summary['rig']['off'] = $rigoff;
 $summary['rig']['hash'] = round($righash);
 $summary['rig']['temp'] = number_format($rigtemp/$rigon,2);
 
-$html = "<link href=\"main.css\" type=\"text/css\" rel=\"stylesheet\"/><head><title>Summary</title></head>
+$sumsha256 = round(($s9hash + $avalonhash)/1000);
+
+$html = "<head><link href=\"main.css\" type=\"text/css\" rel=\"stylesheet\"/>
+<script src=\"//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js\"></script>
+<script type=\"text/javascript\" src=\"js/index.js\"></script><title>Summary</title></head>
 	<body><p style='font-size: 44px; font-weight: bold; text-align: center; padding-top: 25px'>SUMMARY</p>
 	<table id='summarytbl'>
-	<tr class=head><td>Type</td><td>All</td><td>Running</td><td>Warming</td><td>Offline</td><td>Hashrate</td><td>Avg. Temp</td><td></td></td></tr>
-	<tr><td><a href='s9.php' target='_blank'>S9</a></td><td>$s9all</td><td style='color: #23f223'>$s9on</td><td style='color: yellow'>$s9ssh</td><td style='color: red'>$s9off</td><td>".number_format($summary['S9']['hash']/1000)." Th</td><td>".$summary['S9']['temp']."&deg;C</td><td><a>Default Password</a></td></tr>
-	<tr><td><a href='l3.php' target='_blank'>L3</a></td><td>$l3all</td><td style='color: #23f223'>$l3on</td><td style='color: yellow'>$l3ssh</td><td style='color: red'>$l3off</td><td>".number_format($summary['L3']['hash'])." Mh</td><td>".$summary['L3']['temp']."&deg;C</td><td><a>Default Password</a></td></tr>
-	<tr><td><a href='rigs.php' target='_blank'>RIG</a></td><td>$rigall</td><td style='color: #23f223'>$rigon</td><td>--</td><td style='color: red'>$rigoff</td><td>".number_format($summary['rig']['hash'])." Mh</td><td>".$summary['rig']['temp']."&deg;C</td><td></td></tr>
+	<tr class=head><td>Miner</td><td>Algo</td><td>All</td><td>Running</td><td>Warming</td><td>Offline</td><td>Hashrate</td><td>Avg. Temp</td><td></td></td></tr>
+	<tr>
+		<td><a href='s9.php' target='_blank'>S9</a></td>
+		<td>SHA256</td>
+		<td>$s9all</td>
+		<td style='color: #23f223'>$s9on</td>
+		<td style='color: yellow'>$s9ssh</td>
+		<td style='color: red'>$s9off</td>
+		<td>".number_format($summary['S9']['hash']/1000)." Th</td>
+		<td>".$summary['S9']['temp']."&deg;C</td>
+		<td><a id='s9pass'>Default Password</a></td>
+	</tr>
+	<tr>
+		<td><a href='avalons.php' target='_blank'>Avalon</a></td>
+		<td>SHA256</td>
+		<td>$avalonall</td>
+		<td style='color: #23f223'>$avalonon</td>
+		<td>--</td>
+		<td style='color: red'>$avalonoff</td>
+		<td>".number_format($avalonhash/1000)." Th</td>
+		<td>".number_format($avalontemp/$avalonon, 2)."&deg;C</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><a href='l3.php' target='_blank'>L3</a></td>
+		<td>Scrypt</td>
+		<td>$l3all</td>
+		<td style='color: #23f223'>$l3on</td>
+		<td style='color: yellow'>$l3ssh</td>
+		<td style='color: red'>$l3off</td>
+		<td>".number_format($summary['L3']['hash'])." Mh</td>
+		<td>".$summary['L3']['temp']."&deg;C</td>
+		<td><a id='l3pass'>Default Password</a></td>
+	</tr>
+	<tr>
+		<td><a href='rigs.php' target='_blank'>RIG</a></td>
+		<td>ETHash</td>
+		<td>$rigall</td>
+		<td style='color: #23f223'>$rigon</td>
+		<td>--</td>
+		<td style='color: red'>$rigoff</td>
+		<td>".number_format($summary['rig']['hash'])." Mh</td>
+		<td>".$summary['rig']['temp']."&deg;C</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Total</td>
+		<td>SHA256:</td>
+		<td>$sumsha256 Th</td>
+		<td>Scrypt:</td>
+		<td>".number_format($l3hash)." Mh</td>
+		<td>ETHash:</td>
+		<td>".number_format($summary['rig']['hash'])." Mh</td>
+		<td></td>
+		<td></td>
+	</tr>
 	</table>
+	<div id='divedit'>
+		<div id='editclose'>X</div>
+		<div id='editfld'>
+			Set Default miners ssh password<br><br>
+			Password: <span id='s9pflds'><input id='s9passwd' type=text size=12><input id=s9savepass type=submit value=SAVE></span>
+				<span id='l3pflds'><input id='l3passwd' type=text size=12><input id=l3savepass type=submit value=SAVE></span>
+		</div>
+	</div>
 	</body>";
 
 echo $html;
