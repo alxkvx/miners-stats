@@ -1,7 +1,7 @@
 <?php
 
-$s9jsfile = 'json/s9.json';
-$l3jsfile = 'json/l3.json';
+$s9jsfile = 'json/s9pass.json';
+$l3jsfile = 'json/l3pass.json';
 
 $type   = $_GET['type'];
 $passwd   = $_GET['passwd'];

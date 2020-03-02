@@ -3,8 +3,6 @@
 $jsfile = 'json/s9.json';
 $l3jsfile = 'json/l3.json';
 
-$ssh_passwd = '123';
-
 $id   	= $_GET['id'];
 $type   = $_GET['type'];
 $pool[0] = $_GET['pool0'];
@@ -50,10 +48,12 @@ $html = '<link href="main.css" type="text/css" rel="stylesheet"/><head><title>Co
 if ($type == 'l3') {
 	$file = $l3jsfile;
 	$a = json_decode(file_get_contents($file),true);
+	$pswd_json = json_decode(file_get_contents('json/l3pass.json'),true);
 }
 else if ($type == 's9')	{
 	$file = $jsfile;
 	$a = json_decode(file_get_contents($file),true);
+	$pswd_json = json_decode(file_get_contents('json/s9pass.json'),true);
 }
 else {
 	$html .= "BAD Type!";
@@ -68,6 +68,7 @@ if ($type) {
 	else {
 		$ip = $a[$id]['ip'];
 
+		$ssh_passwd = $pswd_json['password'] or $ssh_passwd = 'admin';
 		if ($loadfreq == 'true') {
 			$json = api($ip,'stats');
 			for ($i=0; $i<3; $i++) {
@@ -121,5 +122,3 @@ if ($type) {
 }
 
 echo $html;
-
-?>

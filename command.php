@@ -27,8 +27,16 @@ $command= $_GET['command'];
 $opt 	= $_GET['opt'];
 $url 	= $_GET['url'];
 $user 	= $_GET['user'];
+$type 	= $_GET['type'];
 
-$ssh_passwd = '123';
+if ($type == 'l3') {
+	$pswd_json = json_decode(file_get_contents('json/l3pass.json'),true);
+}
+else if ($type == 's9')	{
+	$pswd_json = json_decode(file_get_contents('json/s9pass.json'),true);
+}
+
+$ssh_passwd = $pswd_json['password'] or $ssh_passwd = 'admin';
 
 if ($command=='addpool') {
 	api($ip,$command,"$url,$user,1");
