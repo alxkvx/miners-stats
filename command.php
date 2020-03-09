@@ -4,9 +4,9 @@ function api($ip,$command,$opt) {
 	
 	$socket = fsockopen($ip, 4028, $err_code, $err_str, 0.5);
 	if (!$socket) {
-			$socket2 = fsockopen($ip, 22, $err_code, $err_str, 0.5);
-					if ($socket2)   {return 1;}
-					else            {return 0;}
+        $socket2 = fsockopen($ip, 22, $err_code, $err_str, 0.5);
+            if ($socket2)   {return 1;}
+            else            {return 0;}
 	}
 	$data = '{"id":1,"jsonrpc":"2.0","command": "'. $command . '","parameter": "'.$opt.'"}' . "\r\n\r\n";
 	fputs($socket, $data);
@@ -17,7 +17,7 @@ function api($ip,$command,$opt) {
 	$buff = preg_replace('/}{/','},{',$buff);
 	$buff = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $buff);
 	print "command: ".$command." param: ".$opt."<br>". $buff . '<br><br>';
-	if (!json_decode($buff)) { print "BAD json, error: " . json_last_error();}
+	if (!json_decode($buff)) { $json = 1; print "BAD json, error: " . json_last_error();}
 	else { $json = json_decode($buff,true);}
 	return $json;
 }
@@ -58,4 +58,3 @@ else if ($command=='addnswtchpool') {
 else {
 	api($ip,$command,$opt);
 }
-?>

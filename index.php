@@ -159,7 +159,7 @@ foreach($rig as $x) {
 		$rigoff++;
 		continue;
 	}
-	$data = '{"id":1,"jsonrpc":"2.0","method":"miner_getstat1"}' . "\r\n\r\n";
+	$data = '{"id":1,"jsonrpc":"2.0","method":"miner_getstat1"}' . '\r\n\r\n';
 	fputs($socket, $data);
 	$buffer = null;
 	while (!feof($socket)) { $buffer .= fgets($socket); }
@@ -235,7 +235,7 @@ $summary['rig']['temp'] = number_format($rigtemp/$rigon,2);
 $sumsha256 = round(($s9hash + $avalonhash)/1000);
 
 $html = "<head><link href=\"main.css\" type=\"text/css\" rel=\"stylesheet\"/>
-<script src=\"//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js\"></script>
+<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js\"></script>
 <script type=\"text/javascript\" src=\"js/index.js\"></script><title>Summary</title></head>
 	<body><p style='font-size: 44px; font-weight: bold; text-align: center; padding-top: 25px'>SUMMARY</p>
 	<table id='summarytbl'>
@@ -307,5 +307,3 @@ $html = "<head><link href=\"main.css\" type=\"text/css\" rel=\"stylesheet\"/>
 	</body>";
 
 echo $html;
-
-?>
