@@ -3,8 +3,8 @@
 $jsfile = 'json/s9.json';
 $l3jsfile = 'json/l3.json';
 
-$id   	= $_GET['id'];
-$type   = $_GET['type'];
+$id   	 = $_GET['id'];
+$type    = $_GET['type'];
 $pool[0] = $_GET['pool0'];
 $pool[1] = $_GET['pool1'];
 $pool[2] = $_GET['pool2'];

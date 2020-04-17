@@ -25,7 +25,7 @@ function api($ip,$command) {
 	$buff = substr($buffer,0,strlen($buffer)-1);
 	$buff = preg_replace('/}{/','},{',$buff);
 	$buff = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $buff);
-	if (!json_decode($buff)) { print "BAD json, error: " . json_last_error();}
+	if (!json_decode($buff)) { $json = 0; print "BAD json, error: " . json_last_error();}
 	else { $json = json_decode($buff,true);}
 	return $json;
 }
@@ -91,11 +91,12 @@ function miner_details($type,$arr) {
 		$pool_prio[$i]     = $json['pools'][0]['POOLS'][$i]['Priority'];
 		$pool_url[$i]      = $json['pools'][0]['POOLS'][$i]['URL'];
 		$pool_user[$i]     = $json['pools'][0]['POOLS'][$i]['User'];
-                $pool_diff[$i]     = $json['pools'][0]['POOLS'][$i]['Diff'];
+        $pool_diff[$i]     = $json['pools'][0]['POOLS'][$i]['Diff'];
 		$pool_lstime[$i]   = $json['pools'][0]['POOLS'][$i]['Last Share Time'];
 		if (strlen($pool_user[$i])>15) {
 			$workerparts = explode(".", $pool_user[$i]);
-			$pool_user[$i] = substr($workerparts[0], 0, -4) . "...".$workerparts[1];}
+			$pool_user[$i] = substr($workerparts[0], 0, -4) . "...".$workerparts[1];
+		}
 	}
 
 	$fw_type	= $json['stats'][0]['STATS'][0]['Type'];
@@ -104,72 +105,70 @@ function miner_details($type,$arr) {
 	$bmminer_ver    = $json['stats'][0]['STATS'][0]['BMMiner'];
 	$freq           = $json['stats'][0]['STATS'][1]['frequency'];
 	
-		for ($x=0;$x<3;$x++) {
-			if ($fw_type == 'Antminer S9k') {
-				$y = 1 + $x;
-                                $asic_ctemp[$x]  = $json['stats'][0]['STATS'][1]["temp$y"];
-                                $asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp2_$y"];
-                                $asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq$y"];
-                        }
-                        else {
-				$y = 6 + $x;
-				$asic_ctemp[$x]  = $json['stats'][0]['STATS'][1]["temp2_$y"];
-	                        $asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp$y"];
-        	                $asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq_avg$y"];
-                        }
-			$asic_volt[$x]   = $json['stats'][0]['STATS'][1]["voltage$y"];
-			$asic_chips[$x]  = $json['stats'][0]['STATS'][1]["chain_acn$y"];
-			$asic_power[$x]  = $json['stats'][0]['STATS'][1]["chain_consumption$y"];
-                        if (!$asic_volt[$x]) {$asic_volt[$x] = $json['stats'][0]['STATS'][1]["chain_vol$y"]/100;}
-			if 	($asic_btemp[$x]>89) { $bcl[$x] = 'red';}
-			else if ($asic_btemp[$x]>80) { $bcl[$x] = 'orange';}
-			else if ($asic_btemp[$x]>75) { $bcl[$x] = 'yellow';}
-			else if ($asic_btemp[$x]>50) { $bcl[$x] = 'green';}
-			else if ($asic_btemp[$x]>15) { $bcl[$x] = 'blue';}
-			else 			     { $bcl[$x] = 'badred';}
-			if	($asic_ctemp[$x]>99) { $ccl[$x] = 'red';}
-			else if ($asic_ctemp[$x]>89) { $ccl[$x] = 'orange';}
-			else if ($asic_ctemp[$x]>85) { $ccl[$x] = 'yellow';}
-			else if ($asic_ctemp[$x]>79) { $ccl[$x] = 'greenlight';}
-			else if ($asic_ctemp[$x]>59) { $ccl[$x] = 'green';}
-			else if ($asic_ctemp[$x]>15) { $ccl[$x] = 'blue';}
-			else			{ $ccl[$x] = 'badred';}
-		}
+	for ($x=0;$x<3;$x++) {
 		if ($fw_type == 'Antminer S9k') {
-                        $fan1    = $json['stats'][0]['STATS'][1]['fan1'];
-                        $fan2    = $json['stats'][0]['STATS'][1]['fan2'];
-                        $voltavg = $json['stats'][0]['STATS'][1]['Voltage'];
-                }
-                else {
-                        $fan1    = $json['stats'][0]['STATS'][1]['fan5'];
-                        $fan2    = $json['stats'][0]['STATS'][1]['fan6'];
-                        $fan3    = $json['stats'][0]['STATS'][1]['fan3'];
-                        $voltavg = round(array_sum($asic_volt)/3,2);
-                }
-		$hrate_ideal	= $json['stats'][0]['STATS'][1]['total_rateideal'];
-		$temp_num       = $json['stats'][0]['STATS'][1]['temp_num'];
-
-		$asic_chip_sum = array_sum($asic_chips);
-		$freqavg = round(array_sum($asic_freq)/3);
-		if ($voltavg==0) {$voltavg ='';}
-		if ($ghs5s > 99000) { $ghs5s = 16000;}	
-		if	(preg_match('/braiins/', $fw_type)) { $fw_type = 'Brains';}
-		else if	(preg_match('/Antminer S9k/', $fw_type)) { $fw_type = 'S9K';}
-		else if (preg_match('/vnish (.*)\)/', $fw_type, $vers)) {$fw_type = "ADIP"; }
-		else if (preg_match('/Antminer/', $fw_type) && $bmminer_ver == '2.0.0 rwglr') {
-			$fw_type = 'MSK';
+			$y = 1 + $x;
+            $asic_ctemp[$x]  = $json['stats'][0]['STATS'][1]["temp$y"];
+            $asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp2_$y"];
+            $asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq$y"];
 		}
-		if	($ghs5s>16000) {$thcl = 'highfiol';}
-		else if	($ghs5s>15000) {$thcl = 'fiol';}
-		else if ($ghs5s>14500) {$thcl = 'greenlight';}
-		else if ($ghs5s>14000) {$thcl = 'green';}
-		else if ($ghs5s>13450) {$thcl = 'blue';}
-		else if ($ghs5s>13000) {$thcl = 'yellow';}
-		else if ($ghs5s>10000) {$thcl = 'orange';}
-		else {$thcl = 'red';}
-		if ($asic_chip_sum<189 && $fw_type != 'S9K') {$csumcl = 'red';}
-		else if ($asic_chip_sum<180 && $fw_type == 'S9K') {$csumcl = 'red';}
-		else {$csumcl = '';}
+		else {
+            $y = 6 + $x;
+            $asic_ctemp[$x]  = $json['stats'][0]['STATS'][1]["temp2_$y"];
+            $asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp$y"];
+            $asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq_avg$y"];
+		}
+        $asic_volt[$x]   = $json['stats'][0]['STATS'][1]["voltage$y"];
+        $asic_chips[$x]  = $json['stats'][0]['STATS'][1]["chain_acn$y"];
+        $asic_power[$x]  = $json['stats'][0]['STATS'][1]["chain_consumption$y"];
+        if (!$asic_volt[$x]) {$asic_volt[$x] = $json['stats'][0]['STATS'][1]["chain_vol$y"]/100;}
+        if 	($asic_btemp[$x]>89) { $bcl[$x] = 'red';}
+        else if ($asic_btemp[$x]>80) { $bcl[$x] = 'orange';}
+        else if ($asic_btemp[$x]>75) { $bcl[$x] = 'yellow';}
+        else if ($asic_btemp[$x]>50) { $bcl[$x] = 'green';}
+        else if ($asic_btemp[$x]>15) { $bcl[$x] = 'blue';}
+        else 			     { $bcl[$x] = 'badred';}
+        if	($asic_ctemp[$x]>99) { $ccl[$x] = 'red';}
+        else if ($asic_ctemp[$x]>89) { $ccl[$x] = 'orange';}
+        else if ($asic_ctemp[$x]>85) { $ccl[$x] = 'yellow';}
+        else if ($asic_ctemp[$x]>79) { $ccl[$x] = 'greenlight';}
+        else if ($asic_ctemp[$x]>59) { $ccl[$x] = 'green';}
+        else if ($asic_ctemp[$x]>15) { $ccl[$x] = 'blue';}
+        else			{ $ccl[$x] = 'badred';}
+	}
+	if ($fw_type == 'Antminer S9k') {
+        $fan1    = $json['stats'][0]['STATS'][1]['fan1'];
+        $fan2    = $json['stats'][0]['STATS'][1]['fan2'];
+        $voltavg = $json['stats'][0]['STATS'][1]['Voltage'];
+	}
+	else {
+        $fan1    = $json['stats'][0]['STATS'][1]['fan5'];
+        $fan2    = $json['stats'][0]['STATS'][1]['fan6'];
+        $fan3    = $json['stats'][0]['STATS'][1]['fan3'];
+        $voltavg = round(array_sum($asic_volt)/3,2);
+	}
+	$hrate_ideal	= $json['stats'][0]['STATS'][1]['total_rateideal'];
+	$temp_num       = $json['stats'][0]['STATS'][1]['temp_num'];
+
+	$asic_chip_sum = array_sum($asic_chips);
+	$freqavg = round(array_sum($asic_freq)/3);
+	if ($voltavg==0) {$voltavg ='';}
+	if ($ghs5s > 99000) { $ghs5s = 16000;}
+	if	(preg_match('/braiins/', $fw_type)) { $fw_type = 'Brains';}
+	else if	(preg_match('/Antminer S9k/', $fw_type)) { $fw_type = 'S9K';}
+	else if (preg_match('/vnish (.*)\)/', $fw_type, $vers)) {$fw_type = "ADIP"; }
+	else if (preg_match('/Antminer/', $fw_type) && $bmminer_ver == '2.0.0 rwglr') {	$fw_type = 'MSK';	}
+	if	($ghs5s>16000) {$thcl = 'highfiol';}
+	else if	($ghs5s>15000) {$thcl = 'fiol';}
+	else if ($ghs5s>14500) {$thcl = 'greenlight';}
+	else if ($ghs5s>14000) {$thcl = 'green';}
+	else if ($ghs5s>13450) {$thcl = 'blue';}
+	else if ($ghs5s>13000) {$thcl = 'yellow';}
+	else if ($ghs5s>10000) {$thcl = 'orange';}
+	else {$thcl = 'red';}
+	if ($asic_chip_sum<189 && $fw_type != 'S9K') {$csumcl = 'red';}
+	else if ($asic_chip_sum<180 && $fw_type == 'S9K') {$csumcl = 'red';}
+	else {$csumcl = '';}
 	
 	$total_power	= array_sum($asic_power);
 	if	($elapsed<180) 		{	$uptime = $elapsed . " sec";$upbox ='box red';}
@@ -212,27 +211,27 @@ function miner_details($type,$arr) {
 	$pwcol = 'fiol';
 	if ($total_power == 0) { 
 		$pwcol = '';
-                if ($ghsav>16000)       { $total_power = 1550;}
-                else if ($ghsav>15500)  { $total_power = 1500;}
-                else if ($ghsav>15000)  { $total_power = 1450;}
-                else if ($ghsav>14500)  { $total_power = 1400;}
-                else if ($ghsav>14000)  { $total_power = 1300;}
-                else if ($ghsav>13500)  { $total_power = 1270;}
-                else if ($ghsav>13000)  { $total_power = 1250;}
-                else if ($ghsav>12500)  { $total_power = 1200;}
-                else if ($ghsav>600)  { $total_power = 1000;}
-                else if ($ghsav>12000)  { $total_power = 1170;}
-                else if ($ghsav>11500)  { $total_power = 1150;}
-                else if ($ghsav>11000)  { $total_power = 1100;}
-                else if ($ghsav>4000 and $ghsav<11000) { $total_power = 1000;}
-                else if ($ghsav>650)  { $total_power = 1000;}
-                else if ($ghsav>600)  { $total_power = 900;}
-                else if ($ghsav>575)  { $total_power = 870;}
-                else if ($ghsav>550)  { $total_power = 850;}
-                else if ($ghsav>520)  { $total_power = 825;}
-                else if ($ghsav>510)  { $total_power = 800;}
-                else if ($ghsav>500)  { $total_power = 780;}
-                else   			{ $total_power = 750;}
+        if ($ghsav>16000)       { $total_power = 1550;}
+        else if ($ghsav>15500)  { $total_power = 1500;}
+        else if ($ghsav>15000)  { $total_power = 1450;}
+        else if ($ghsav>14500)  { $total_power = 1400;}
+        else if ($ghsav>14000)  { $total_power = 1300;}
+        else if ($ghsav>13500)  { $total_power = 1270;}
+        else if ($ghsav>13000)  { $total_power = 1250;}
+        else if ($ghsav>12500)  { $total_power = 1200;}
+        else if ($ghsav>600)  { $total_power = 1000;}
+        else if ($ghsav>12000)  { $total_power = 1170;}
+        else if ($ghsav>11500)  { $total_power = 1150;}
+        else if ($ghsav>11000)  { $total_power = 1100;}
+        else if ($ghsav>4000 and $ghsav<11000) { $total_power = 1000;}
+        else if ($ghsav>650)  { $total_power = 1000;}
+        else if ($ghsav>600)  { $total_power = 900;}
+        else if ($ghsav>575)  { $total_power = 870;}
+        else if ($ghsav>550)  { $total_power = 850;}
+        else if ($ghsav>520)  { $total_power = 825;}
+        else if ($ghsav>510)  { $total_power = 800;}
+        else if ($ghsav>500)  { $total_power = 780;}
+        else   			{ $total_power = 750;}
         }
 	
 	if ($asic_ctemp[0] < 16) {
@@ -300,7 +299,12 @@ function miner_details($type,$arr) {
 		<td class=$lscol>$pool_lstime[$poolnum]</td>
 		<td>$blocks</td>
 		<td><span class=\"$upbox\">$uptime</span></td>
-		<td><span class=\"box $fanckcl\">$fan_check</span><span class=\"box $fanmodecl\">$fan_mode</span><span class=\"box $fan1cl\">$fan1</span><span class=\"box $fan2cl\">$fan2</span></td>
+		<td>
+		    <span class=\"box $fanckcl\">$fan_check</span>
+		    <span class=\"box $fanmodecl\">$fan_mode</span>
+		    <span class=\"box $fan1cl\">$fan1</span>
+		    <span class=\"box $fan2cl\">$fan2</span>
+		</td>
 		<td>$voltavg</td>
 		<td class=$freqcol>$freqavg</td>
 		<td>".number_format($hrate_ideal)."</td>
@@ -373,8 +377,12 @@ if ($avail>0) {$availclass = 'fyellow';} else {$availclass = '';}
 if ($offline>0) {$offclass = 'fred';} else { $offclass = '';}
 
 $html .= "<tr><td colspan=2><span class=\"box fiol\"><a href=\"add.php?type=s9\" target=\"_blank\">ADD</a></span></td></tr></table><br>
-		<span class=bold>Total: ". $s9num . " miners (<span class=fgreen>$online</span> / <span class=$availclass>$avail</span> / <span class=$offclass>$offline</span>)" . " | <span class=fblue>". number_format($totalavg/$online/1000,3)."</span> T (S9avg) | " . number_format($totalhashrate/1000,1) . " T | <span class=fblue>".number_format($totalavg/1000,1) ."</span> T(avg) | ".round($total_temp/$s9numt,2)."&deg; (avg) | <span class=forange>" .number_format($total_pwr/1000,2)."</span> kWt | Reject Rate: ". round($rejrateall/$s9numt,3) ."% || Load time: " . round(microtime(true) - $start, 3) . " sec (" . date('Y-m-d H:i:s') .")<br>";
+		<span class=bold>Total: ". $s9num . " miners (
+		<span class=fgreen>$online</span> / 
+		<span class=$availclass>$avail</span> / 
+		<span class=$offclass>$offline</span>)" . " | 
+		<span class=fblue>". number_format($totalavg/$online/1000,3)."</span> T (S9avg) | " . number_format($totalhashrate/1000,1) . " T | 
+		<span class=fblue>".number_format($totalavg/1000,1) ."</span> T(avg) | ".round($total_temp/$s9numt,2)."&deg; (avg) | 
+		<span class=forange>" .number_format($total_pwr/1000,2)."</span> kWt | Reject Rate: ". round($rejrateall/$s9numt,3) ."% || Load time: " . round(microtime(true) - $start, 3) . " sec (" . date('Y-m-d H:i:s') .")<br>";
 
-print $html . "</body>";
-
-?>
+echo $html . '</body>';

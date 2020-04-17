@@ -435,7 +435,7 @@ if ($_GET['id']) {
 		$htm .= "Bad ID: $id<br>";
 	}
 }
-else if ($_GET['ip']) 	{ 
+else if ($_GET['ip']) 	{
 	$ip = $_GET['ip'];
 	$htm .= '<head><title>ASIC: '.$ip.'</title></head><body>';
 	$htm .= miner_details($type,0,$ip);
@@ -445,5 +445,3 @@ else { 	$htm .= "Bad ID or IP<br>";}
 $exec_time = round(microtime(true) - $start, 3);
 
 print "$htm<br>Load time: " . $exec_time . " sec (" . date('Y-m-d H:i:s') .")<span><br></span></body>";
-
-?>

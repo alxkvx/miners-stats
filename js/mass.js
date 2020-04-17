@@ -12,11 +12,17 @@ $(document).ready(function() {
 				user0 = $("#defusr1").val(),
 				user1 = $("#defusr2").val(),
 				user2 = $("#defusr3").val(),
+				freq0 = $("#freq0").val(),
+				freq1 = $("#freq1").val(),
+				freq2 = $("#freq2").val(),
+				volt0 = $("#volt0").val(),
+				volt1 = $("#volt1").val(),
+				volt2 = $("#volt2").val(),
 				temp  = $("#deftemp").val(),
 				sensor= $("#defsensor").val(),
 				fans = $("#deffanck").val(),
 				worker = user+'.'+aid;
-				url = 'poolsave.php?ip='+ip+'&type=s9&pool0='+encodeURIComponent(pool0)+'&user0='+user0+'.'+aid+'&pool1='+encodeURIComponent(pool1)+'&user1='+user1+'.'+aid+'&pool2='+encodeURIComponent(pool2)+'&user2='+user2+'.'+aid+'&temp='+temp+'&sensor='+sensor+'&fanck='+fans+'&loadfreq=true';
+				url = 'configsave.php?id='+aid+'&type=s9&pool0='+encodeURIComponent(pool0)+'&user0='+user0+'.'+aid+'&pool1='+encodeURIComponent(pool1)+'&user1='+user1+'.'+aid+'&pool2='+encodeURIComponent(pool2)+'&user2='+user2+'.'+aid+'&temp='+temp+'&sensor='+ sensor+ '&fanck='+ fans + '&loadfreq=true' + '&freq0=' + freq0 + '&freq1=' + freq1 + '&freq2=' + freq2 + '&volt0=' + volt0 + '&volt1=' + volt1 + '&volt2=' + volt2;
 				$.get(url, function(data){
 					$('#pools').append(data);
 				});

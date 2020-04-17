@@ -373,37 +373,38 @@ foreach($s9 as $x) {
 if ($avail>0) {$availclass = 'fyellow';} else {$availclass = '';}
 if ($offline>0) {$offclass = 'fred';} else { $offclass = '';}
 
-$html .= "</table><br><span class=bold>Total: ". $s9num . " miners (<span class=fgreen>$online</span> / <span class=$availclass>$avail</span> / <span class=$offclass>$offline</span>)" . " | <span class=fblue>". number_format($totalavg/$online/1000,3)."</span> T (S9avg) | " . number_format($totalhashrate/1000,1) . " T | <span class=fblue>".number_format($totalavg/1000,1) ."</span> T(avg) | ".round($total_temp/$s9numt,2)."&deg; (avg) | " .number_format($total_pwr)." W <br>
+$html .= '</table><br><span class=bold>Total: '. $s9num . ' miners (<span class=fgreen>$online</span> / <span class=$availclass>$avail</span> / <span class=$offclass>$offline</span>)' . ' | <span class=fblue>' . number_format($totalavg/$online/1000,3)."</span> T (S9avg) | " . number_format($totalhashrate/1000,1) . " T | <span class=fblue>".number_format($totalavg/1000,1) ."</span> T(avg) | ".round($total_temp/$s9numt,2)."&deg; (avg) | " .number_format($total_pwr).' W <br>
 
 <div id=pools>
 <h2>Add and Switch Pool</h2>
-	<input id=urlsw  type=\"text\" name=\"url\" value=\"\" size=30>
-	<input id=usersw type=\"text\" name=\"user\" size=10>
-	<input id=add  type=\"submit\" value=\"ADD\"> 
-	<input id=addnswt  type=\"submit\" value=\"ADD & SWITCH\"> 
+	<input id=urlsw  type="text" name="url" value="" size=30>
+	<input id=usersw type="text" name="user" size=10>
+	<input id=add  type="submit" value="ADD"> 
+	<input id=addnswt  type="submit" value="ADD & SWITCH"> 
 
 <h2>Pool Switch and Delete</h2>
-	<input id=poolid type=\"text\" name=\"poolid\" size=3>
-	<input id=pooldel type=\"submit\" value=\"DELETE\"> 
- 	<input id=switch type=\"submit\" value=\"SWITCH\"> 
+	<input id=poolid type="text" name="poolid" size=3>
+	<input id=pooldel type="submit" value="DELETE"> 
+ 	<input id=switch type="submit" value="SWITCH"> 
 
 <h2>Default Config</h2>
-Pool #1: <input id=defpool1 type=\"text\" name=\"url\" value=\"url\" size=30><input id=defusr1 type=\"text\" name=\"user\" value=user size=10><br>
-Pool #2: <input id=defpool2 type=\"text\" name=\"url\" value=\"url\" size=30><input id=defusr2 type=\"text\" name=\"user\" value=user size=10><br>
-Pool #3: <input id=defpool3 type=\"text\" name=\"url\" value=\"url\" size=30><input id=defusr3 type=\"text\" name=\"user\" value=user size=10><br>
+Pool #1: <input id=defpool1 type="text" name="url" value="url" size=30><input id=defusr1 type="text" name="user" value=user size=10><br>
+Pool #2: <input id=defpool2 type="text" name="url" value="url" size=30><input id=defusr2 type="text" name="user" value=user size=10><br>
+Pool #3: <input id=defpool3 type="text" name="url" value="url" size=30><input id=defusr3 type="text" name="user" value=user size=10><br>
+Freq #0: <input type=text id=freq0 value="" size=5> Volt: <input type=text id=volt0 value="" size=5><br>
+Freq #1: <input type=text id=freq1 value="" size=5> Volt: <input type=text id=volt1 value="" size=5><br>
+Freq #2: <input type=text id=freq2 value="" size=5> Volt: <input type=text id=volt2 value="" size=5><br>
 Temp Critical: <input id=deftemp type=text name=temp value=110 size=5><br>
-Disable Sensor Scan: <input id=defsensor name=sensor type=checkbox value=\"true\"><br>
-Disable Fans Check: <input id=deffanck name=fanck type=checkbox value=\"true\"><br>
-<br>	<input id=defsubmit type=\"submit\" value=\"SUBMIT\"> 
+Disable Sensor Scan: <input id=defsensor name=sensor type=checkbox value="true"><br>
+Disable Fans Check: <input id=deffanck name=fanck type=checkbox value="true"><br>
+<br>	<input id=defsubmit type="submit" value="SUBMIT"> 
 
 <h2>Restart Miner</h2>
-	<input id=restart type=\"submit\" value=\"RESTART\">
+	<input id=restart type="submit" value="RESTART">
 	
 <h2>Delete Miner</h2>
-	<input id=delete type=\"submit\" value=\"DELETE\"> 
-
-</div>
-";
+	<input id=delete type="submit" value="DELETE"> 
+</div>';
 
 $exec_time = round(microtime(true) - $start, 3);
 $html .=  "<br>Load time: " . $exec_time . " sec (" . date('Y-m-d H:i:s') .")";
