@@ -18,7 +18,7 @@ function api($ip,$command) {
     $buff = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $buff);
     if (!json_decode($buff)) {
         $json = 0;
-        print "BAD json, error: " . json_last_error();
+        echo "BAD json, error: " . json_last_error();
     }
     else {
         $json = json_decode($buff,true);

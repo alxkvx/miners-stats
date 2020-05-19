@@ -1,34 +1,14 @@
 <?php
-
 error_reporting(E_ERROR | E_PARSE);
 $start = microtime(true);
 
-$s9 = json_decode(file_get_contents('json/s9.json'),true);
+require_once('functions.php');
+require_once('files.php');
+
+$s9 = json_decode(file_get_contents($s9jsonfile),true);
 
 $s9num = count($s9);
 $totalhashrate = 0;
-
-function api($ip,$command) {
-
-	$socket = fsockopen($ip, 4028, $err_code, $err_str, 0.1);
-	if (!$socket) {
-		$socket2 = fsockopen($ip, 80, $err_code, $err_str, 0.1);
-			if ($socket2)	{return 1;}
-			else 		{return 0;}
-	}
-	$data = '{"id":1,"jsonrpc":"2.0","command": "'. $command . '"}' . "\r\n\r\n";
-	stream_set_timeout($socket, 1);
-	fputs($socket, $data);
-	$buffer = null;
-	while (!feof($socket)) { $buffer .= fread($socket, 4028); }
-	if ($socket) {  fclose($socket); }
-	$buff = substr($buffer,0,strlen($buffer)-1);
-	$buff = preg_replace('/}{/','},{',$buff);
-	$buff = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $buff);
-	if (!json_decode($buff)) { $json = 0; print "BAD json, error: " . json_last_error();}
-	else { $json = json_decode($buff,true);}
-	return $json;
-}
 
 function miner_details($type,$arr) {
 
@@ -53,7 +33,7 @@ function miner_details($type,$arr) {
 		<td><span class=\"box red\"><a href=\"del.php?id=$id\" target=\"_blank\">X</a></span></td>
 		<td>$comment</td></tr>");
 	}
-	$json = api($ip,'summary+pools+stats');
+	$json = api($ip,'summary+pools+stats+devdetails+devs');
 	if ($json == 0)	{
 		return array(0,0,0,"<tr>
 		<td><a style=\"color:red;\" href=\"getinfo.php?id=$id\" target=\"_blank\">$id</a></td>
@@ -85,41 +65,63 @@ function miner_details($type,$arr) {
 	$ghsav          = $json['summary'][0]['SUMMARY'][0]['GHS av'];
 	$ghs5s          = $json['summary'][0]['SUMMARY'][0]['GHS 5s'];
 	$blocks         = $json['summary'][0]['SUMMARY'][0]['Found Blocks'];
-	
-	for ($i=0; $i<6; $i++) {
+    $fw_type	    = $json['stats'][0]['STATS'][0]['Type'];
+    $miner_ver      = $json['stats'][0]['STATS'][0]['Miner'];
+    $miner_compile  = $json['stats'][0]['STATS'][0]['CompileTime'];
+    $bmminer_ver    = $json['stats'][0]['STATS'][0]['BMMiner'];
+    $freq           = $json['stats'][0]['STATS'][1]['frequency'];
+    if (!$fw_type) { $fw_type = $json['summary'][0]['STATUS'][0]['Description'];}
+    if      (preg_match('/braiins/', $fw_type)) { $fw_type = 'Brains';}
+    else if (preg_match('/BOSminer/', $fw_type)) { $fw_type = 'BOSminer'; }
+    else if (preg_match('/Antminer S9k/', $fw_type)) { $fw_type = 'S9K';}
+    else if (preg_match('/vnish (.*)\)/', $fw_type, $vers)) {$fw_type = "ADIP"; }
+    else if (preg_match('/Antminer/', $fw_type) && $bmminer_ver == '2.0.0 rwglr') { $fw_type = 'MSK';}
+    if ($fw_type == 'BOSminer') {
+        $ghsav          = $json['summary'][0]['SUMMARY'][0]['MHS av']/1000;
+        $ghs5s          = $json['summary'][0]['SUMMARY'][0]['MHS 5s']/1000;
+    }
+    for ($i=0; $i<6; $i++) {
 		$pool_status[$i]   = $json['pools'][0]['POOLS'][$i]['Status'];
 		$pool_prio[$i]     = $json['pools'][0]['POOLS'][$i]['Priority'];
 		$pool_url[$i]      = $json['pools'][0]['POOLS'][$i]['URL'];
 		$pool_user[$i]     = $json['pools'][0]['POOLS'][$i]['User'];
         $pool_diff[$i]     = $json['pools'][0]['POOLS'][$i]['Diff'];
 		$pool_lstime[$i]   = $json['pools'][0]['POOLS'][$i]['Last Share Time'];
-		if (strlen($pool_user[$i])>15) {
+        if (!$pool_diff[$i]) {
+            $pool_diff[$i] = $json['pools'][0]['POOLS'][$i]['Work Difficulty'];
+            $pool_lstime[$i]   = round(microtime(true) - $pool_lstime[$i]). 's';
+        }
+        if (strlen($pool_user[$i])>15) {
 			$workerparts = explode(".", $pool_user[$i]);
 			$pool_user[$i] = substr($workerparts[0], 0, -4) . "...".$workerparts[1];
 		}
 	}
-
-	$fw_type	= $json['stats'][0]['STATS'][0]['Type'];
-	$miner_ver      = $json['stats'][0]['STATS'][0]['Miner'];
-	$miner_compile  = $json['stats'][0]['STATS'][0]['CompileTime'];
-	$bmminer_ver    = $json['stats'][0]['STATS'][0]['BMMiner'];
-	$freq           = $json['stats'][0]['STATS'][1]['frequency'];
-	
-	for ($x=0;$x<3;$x++) {
-		if ($fw_type == 'Antminer S9k') {
-			$y = 1 + $x;
+    for ($x=0;$x<3;$x++) {
+        if ($fw_type == 'S9K') {
+            $y = 1 + $x;
             $asic_ctemp[$x]  = $json['stats'][0]['STATS'][1]["temp$y"];
             $asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp2_$y"];
             $asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq$y"];
-		}
-		else {
+            $asic_volt[$x]   = $json['stats'][0]['STATS'][1]["voltage$y"];
+            $asic_chips[$x]  = $json['stats'][0]['STATS'][1]["chain_acn$y"];
+        }
+        else if ($fw_type == 'BOSminer'){
+            $asic_ctemp[$x]  = round($json['temps'][0]['TEMPS'][$x]['Chip']);
+            $asic_btemp[$x]  = round($json['temps'][0]['TEMPS'][$x]['Board']);
+            $asic_freq[$x]   = $json['devdetails'][0]['DEVDETAILS'][$x]['Frequency']/10**6;
+            $asic_volt[$x]   = round($json['devdetails'][0]['DEVDETAILS'][$x]['Voltage'],1);
+            $asic_chips[$x]  = $json['devdetails'][0]['DEVDETAILS'][$x]['Chips'];
+            $asic_hr_ideal[$x]=$json['devs'][0]['DEVS'][$x]['Nominal MHS'];
+
+        }
+        else {
             $y = 6 + $x;
             $asic_ctemp[$x]  = $json['stats'][0]['STATS'][1]["temp2_$y"];
             $asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp$y"];
             $asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq_avg$y"];
-		}
-        $asic_volt[$x]   = $json['stats'][0]['STATS'][1]["voltage$y"];
-        $asic_chips[$x]  = $json['stats'][0]['STATS'][1]["chain_acn$y"];
+            $asic_volt[$x]   = $json['stats'][0]['STATS'][1]["voltage$y"];
+            $asic_chips[$x]  = $json['stats'][0]['STATS'][1]["chain_acn$y"];
+        }
         $asic_power[$x]  = $json['stats'][0]['STATS'][1]["chain_consumption$y"];
         if (!$asic_volt[$x]) {$asic_volt[$x] = $json['stats'][0]['STATS'][1]["chain_vol$y"]/100;}
         if 	($asic_btemp[$x]>89) { $bcl[$x] = 'red';}
@@ -154,10 +156,6 @@ function miner_details($type,$arr) {
 	$freqavg = round(array_sum($asic_freq)/3);
 	if ($voltavg==0) {$voltavg ='';}
 	if ($ghs5s > 99000) { $ghs5s = 16000;}
-	if	(preg_match('/braiins/', $fw_type)) { $fw_type = 'Brains';}
-	else if	(preg_match('/Antminer S9k/', $fw_type)) { $fw_type = 'S9K';}
-	else if (preg_match('/vnish (.*)\)/', $fw_type, $vers)) {$fw_type = "ADIP"; }
-	else if (preg_match('/Antminer/', $fw_type) && $bmminer_ver == '2.0.0 rwglr') {	$fw_type = 'MSK';	}
 	if	($ghs5s>16000) {$thcl = 'highfiol';}
 	else if	($ghs5s>15000) {$thcl = 'fiol';}
 	else if ($ghs5s>14500) {$thcl = 'greenlight';}
@@ -232,7 +230,7 @@ function miner_details($type,$arr) {
         else if ($ghsav>510)  { $total_power = 800;}
         else if ($ghsav>500)  { $total_power = 780;}
         else   			{ $total_power = 750;}
-        }
+	}
 	
 	if ($asic_ctemp[0] < 16) {
 		if 	($asic_ctemp[1] < 16) {$ctempavg = $asic_ctemp[2];}

@@ -2,26 +2,8 @@
 error_reporting(E_ERROR | E_PARSE);
 $start = microtime(true);
 
-function api($ip,$command) {
-
-        $socket = fsockopen($ip, 4028, $err_code, $err_str, 0.2);
-        if (!$socket) {
-                $socket2 = fsockopen($ip, 80, $err_code, $err_str, 0.2);
-                        if ($socket2)   {return 1;}
-                        else            {return 0;}
-        }
-        $data = '{"id":1,"jsonrpc":"2.0","command": "'. $command . '"}' . "\r\n\r\n";
-        fputs($socket, $data);
-        $buffer = null;
-        while (!feof($socket)) { $buffer .= fgets($socket, 4028); }
-        if ($socket) {  fclose($socket); }
-        $buff = substr($buffer,0,strlen($buffer)-1);
-        $buff = preg_replace('/}{/','},{',$buff);
-        $buff = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $buff);
-        if (!json_decode($buff)) { print "BAD json, error: " . json_last_error();}
-        else { $json = json_decode($buff,true);}
-        return $json;
-}
+require_once('functions.php');
+require_once('files.php');
 
 function miner_details($type,$id,$arr) {
 
@@ -52,12 +34,12 @@ function miner_details($type,$id,$arr) {
 		<div id='conffld'>
 		BRAIN OS Config:
 		<table cellpadding=3>
-			<tr><td align=right>Pool #0:</td><td><input type=text name=pool0 value=\"\" size=35></td><td>User: <input type=text name=user0 value=\"\" size=10></td></tr>
-			<tr><td align=right>Pool #1:</td><td><input type=text name=pool1 value=\"\" size=35></td><td>User: <input type=text name=user1 value=\"\" size=10></td></tr>
-			<tr><td align=right>Pool #2:</td><td><input type=text name=pool2 value=\"\" size=35></td><td>User: <input type=text name=user2 value=\"\" size=10></td></tr>
-			<tr><td align=right>Freq #0:</td><td><input type=text name=freq0 value=\"\" size=5> Volt: <input type=text name=volt0 value=\"\" size=5></td></tr>
-			<tr><td align=right>Freq #1:</td><td><input type=text name=freq1 value=\"\" size=5> Volt: <input type=text name=volt1 value=\"\" size=5></td></tr>
-			<tr><td align=right>Freq #2:</td><td><input type=text name=freq2 value=\"\" size=5> Volt: <input type=text name=volt2 value=\"\" size=5></td></tr>
+			<tr><td align=right>Pool #0:</td><td><input type=text name=pool0 value='' size=35></td><td>User: <input type=text name=user0 value=\"\" size=10></td></tr>
+			<tr><td align=right>Pool #1:</td><td><input type=text name=pool1 value='' size=35></td><td>User: <input type=text name=user1 value=\"\" size=10></td></tr>
+			<tr><td align=right>Pool #2:</td><td><input type=text name=pool2 value='' size=35></td><td>User: <input type=text name=user2 value=\"\" size=10></td></tr>
+			<tr><td align=right>Freq #0:</td><td><input type=text name=freq0 value='' size=5> Volt: <input type=text name=volt0 value=\"\" size=5></td></tr>
+			<tr><td align=right>Freq #1:</td><td><input type=text name=freq1 value='' size=5> Volt: <input type=text name=volt1 value=\"\" size=5></td></tr>
+			<tr><td align=right>Freq #2:</td><td><input type=text name=freq2 value='' size=5> Volt: <input type=text name=volt2 value=\"\" size=5></td></tr>
 			<tr><td align=right>Temp Critical:</td><td><input type=text name=temp value=110 size=5></td></tr>
 			<tr><td align=right>Disable Sensor Scan:</td><td><input name=sensor type=checkbox value=true></td></tr>
 			<tr><td align=right>Disable Fans Check:</td><td><input name=fanck type=checkbox value=true></td></tr>
@@ -79,7 +61,7 @@ function miner_details($type,$id,$arr) {
 		<td>$com</td></tr></table>";
 	}
 
-	$json = api($ip,'summary+pools+stats');
+	$json = api($ip,'summary+pools+stats+devdetails+devs');
 	if ($json == 0) {
 		return $headtbl ."<tr>
 		<td class=wid>$id</td>
@@ -95,8 +77,8 @@ function miner_details($type,$id,$arr) {
 		<td class=wid>$id</td>
 		<td>$model</td>
 		<td></td>
-		<td><span class=\"box yellow\">Web</span></td>
-		<td><span class=\"box\"><a href=\"http://$ip\" target=\"_blank\">$ip</a></span></td>
+		<td><span class='box yellow'>Web</span></td>
+		<td><span class='box'><a href='http://$ip' target='_blank'>$ip</a></span></td>
 		<td colspan=21></td>
 		<td><span id='grestart'>Restart</span> ( <span id='restartminer'>Miner</span> ) | <span id='edit'>Edit</span> | <span id='config'>Config</span></td>
 		<td>$com</td></tr></table>";
@@ -111,7 +93,25 @@ function miner_details($type,$id,$arr) {
 	$ghsav          = $json['summary'][0]['SUMMARY'][0]['GHS av'];
 	$ghs5s          = $json['summary'][0]['SUMMARY'][0]['GHS 5s'];
 	$blocks         = $json['summary'][0]['SUMMARY'][0]['Found Blocks'];
-
+    $fw_type	    = $json['stats'][0]['STATS'][0]['Type'];
+    $freq           = $json['stats'][0]['STATS'][1]['frequency'];
+    $miner_ver      = $json['stats'][0]['STATS'][0]['Miner'];
+    $miner_compile  = $json['stats'][0]['STATS'][0]['CompileTime'];
+    $bmminer_ver    = $json['stats'][0]['STATS'][0]['BMMiner'];
+    $freq           = $json['stats'][0]['STATS'][1]['frequency'];
+    $fan_mode	    = $json['stats'][0]['STATS'][1]['manual_fan_mode'];
+    $hrate_ideal    = $json['stats'][0]['STATS'][1]['total_rateideal'];
+    $temp_num	    = $json['stats'][0]['STATS'][1]['temp_num'];
+    if (!$fw_type) { $fw_type = $json['summary'][0]['STATUS'][0]['Description'];}
+    if      (preg_match('/braiins/', $fw_type)) { $fw_type = 'Brains';}
+    else if (preg_match('/BOSminer/', $fw_type)) { $fw_type = 'BOSminer'; }
+    else if (preg_match('/Antminer S9k/', $fw_type)) { $fw_type = 'S9K';}
+    else if (preg_match('/vnish (.*)\)/', $fw_type, $vers)) {$fw_type = "ADIP"; }
+    else if (preg_match('/Antminer/', $fw_type) && $bmminer_ver == '2.0.0 rwglr') { $fw_type = 'MSK';}
+    if ($fw_type == 'BOSminer') {
+        $ghsav          = $json['summary'][0]['SUMMARY'][0]['MHS av']/1000;
+        $ghs5s          = $json['summary'][0]['SUMMARY'][0]['MHS 5s']/1000;
+    }
 	for ($i=0; $i<6; $i++) {
 		$pool_status[$i]   = $json['pools'][0]['POOLS'][$i]['Status'];
 		$pool_prio[$i]     = $json['pools'][0]['POOLS'][$i]['Priority'];
@@ -127,32 +127,36 @@ function miner_details($type,$id,$arr) {
 		$pool_diffa[$i]    = $json['pools'][0]['POOLS'][$i]['Difficulty Accepted'];
 		$pool_diffr[$i]    = $json['pools'][0]['POOLS'][$i]['Difficulty Rejected'];
 	}
-
- 	$miner_type     = $json['stats'][0]['STATS'][0]['Type'];
- 	$miner_ver      = $json['stats'][0]['STATS'][0]['Miner'];
- 	$miner_compile  = $json['stats'][0]['STATS'][0]['CompileTime'];
- 	$freq           = $json['stats'][0]['STATS'][1]['frequency'];
-
 	if ($type == 's9') {
-        $bmminer_ver    = $json['stats'][0]['STATS'][0]['BMMiner'];
 		for ($x=0;$x<3;$x++) {
-			if ($miner_type == 'Antminer S9k') {
+			if ($fw_type == 'S9K') {
 				$y = 1 + $x;
-                		$ctemp[$x]       = $json['stats'][0]['STATS'][1]["temp$y"];
-                		$asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp2_$y"];
-                		$asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq$y"];
+                $ctemp[$x]       = $json['stats'][0]['STATS'][1]["temp$y"];
+                $asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp2_$y"];
+                $asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq$y"];
+                $asic_volt[$x]   = $json['stats'][0]['STATS'][1]["voltage$y"];
+                $asic_chips[$x]  = $json['stats'][0]['STATS'][1]["chain_acn$y"];
 			}
+			else if ($fw_type == 'BOSminer'){
+                $ctemp[$x]  = round($json['temps'][0]['TEMPS'][$x]['Chip']);
+                $asic_btemp[$x]  = round($json['temps'][0]['TEMPS'][$x]['Board']);
+                $asic_freq[$x]   = $json['devdetails'][0]['DEVDETAILS'][$x]['Frequency']/10**6;
+                $asic_volt[$x]   = round($json['devdetails'][0]['DEVDETAILS'][$x]['Voltage'],1);
+                $asic_chips[$x]  = $json['devdetails'][0]['DEVDETAILS'][$x]['Chips'];
+                $asic_hrideal[$x]=$json['devs'][0]['DEVS'][$x]['Nominal MHS'];
+
+            }
 			else {
 				$y = 6 + $x;
-                		$ctemp[$x]       = $json['stats'][0]['STATS'][1]["temp2_$y"];
-                		$asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp$y"];
-                		$asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq_avg$y"];
+                $ctemp[$x]       = $json['stats'][0]['STATS'][1]["temp2_$y"];
+                $asic_btemp[$x]  = $json['stats'][0]['STATS'][1]["temp$y"];
+                $asic_freq[$x]   = $json['stats'][0]['STATS'][1]["freq_avg$y"];
 			}
-                	$asic_chips[$x]  = $json['stats'][0]['STATS'][1]["chain_acn$y"];
-                	$asic_hrideal[$x]= $json['stats'][0]['STATS'][1]["chain_rateideal$y"];
-                	$asic_hr[$x]     = $json['stats'][0]['STATS'][1]["chain_rate$y"];
-                	$asic_hw[$x]     = $json['stats'][0]['STATS'][1]["chain_hw$y"];
-                	$asic_chain[$x]  = $json['stats'][0]['STATS'][1]["chain_acs$y"];
+            $asic_chips[$x]  = $json['stats'][0]['STATS'][1]["chain_acn$y"];
+            $asic_hrideal[$x]= $json['stats'][0]['STATS'][1]["chain_rateideal$y"];
+            $asic_hr[$x]     = $json['stats'][0]['STATS'][1]["chain_rate$y"];
+            $asic_hw[$x]     = $json['stats'][0]['STATS'][1]["chain_hw$y"];
+            $asic_chain[$x]  = $json['stats'][0]['STATS'][1]["chain_acs$y"];
 			$asic_power[$x]	 = $json['stats'][0]['STATS'][1]["chain_consumption$y"];
 			if (!$asic_power[$x]) {$asic_power[$x]	 = $json['stats'][0]['STATS'][1]["chain_power$y"];}
 			$asic_volt[$x]	 = $json['stats'][0]['STATS'][1]["voltage$y"];
@@ -160,24 +164,20 @@ function miner_details($type,$id,$arr) {
 				$asic_volt[$x] = $json['stats'][0]['STATS'][1]["chain_vol$y"]/100;
 			}
 		}
-		if ($miner_type == 'Antminer S9k') {
-                	$fan1    = $json['stats'][0]['STATS'][1]['fan1'];
-	                $fan2    = $json['stats'][0]['STATS'][1]['fan2'];
+		if ($fw_type == 'S9K') {
+            $fan1    = $json['stats'][0]['STATS'][1]['fan1'];
+	        $fan2    = $json['stats'][0]['STATS'][1]['fan2'];
 			$voltavg = $json['stats'][0]['STATS'][1]['Voltage'];
 		}
 		else {
-	                $fan1    = $json['stats'][0]['STATS'][1]['fan5'];
-        	        $fan2    = $json['stats'][0]['STATS'][1]['fan6'];
-                	$fan3    = $json['stats'][0]['STATS'][1]['fan3'];
+	        $fan1    = $json['stats'][0]['STATS'][1]['fan5'];
+            $fan2    = $json['stats'][0]['STATS'][1]['fan6'];
+            $fan3    = $json['stats'][0]['STATS'][1]['fan3'];
 			$voltavg = round(array_sum($asic_volt)/3,2);
 		}
-		$fan_mode	= $json['stats'][0]['STATS'][1]['manual_fan_mode'];
-                $hrate_ideal    = $json['stats'][0]['STATS'][1]['total_rateideal'];
-		$temp_num	= $json['stats'][0]['STATS'][1]['temp_num'];
-		
+
 		$freqavg = round(array_sum($asic_freq)/3);
-                $asic_chip_sum = array_sum($asic_chips);
-                $miner_type     =  preg_replace('/S9S9/','S9',$miner_type);
+        $asic_chip_sum = array_sum($asic_chips);
 		for ($i=0; $i<3; $i++) {
 			if ($asic_btemp[$i]>89) { $bcl[$i] = 'red';}
 			else if ($asic_btemp[$i]>80) { $bcl[$i] = 'orange';}
@@ -193,28 +193,30 @@ function miner_details($type,$id,$arr) {
 			else if ($ctemp[$i]>15) { $ccl[$i] = 'blue';}
 			else {$ccl[$i] = 'badred';}
 		}
-                if ($ghs5s>15000) {$thcl = 'fiol';}
+		if ($ghs5s>15000) {$thcl = 'fiol';}
 		else if ($ghs5s>14500) {$thcl = 'greenlight';}
 		else if ($ghs5s>14000) {$thcl = 'green';}
 		else if ($ghs5s>13450) {$thcl = 'blue';}
 		else if ($ghs5s>13000) {$thcl = 'yellow';}
 		else if ($ghs5s>10000) {$thcl = 'orange';} else {$thcl = 'red';}
-                if ($asic_chip_sum<189 && $miner_type != 'Antminer S9k') {$csumcl = 'red';} 
-                else if ($asic_chip_sum<180 && $miner_type == 'Antminer S9k') {$csumcl = 'red';} 
+		if ($asic_chip_sum<189 && $fw_type != 'S9K') {$csumcl = 'red';}
+		else if ($asic_chip_sum<180 && $fw_type == 'S9K') {$csumcl = 'red';}
 		else {$csumcl = '';}
-        }
-        else {
-			for ($x=0;$x<4;$x++) { $y = 1 + $x;
-				$asic_btemp[$x] = $json['stats'][0]['STATS'][1]["temp$y"];
-				$ctemp[$x]      = $json['stats'][0]['STATS'][1]["temp2_$y"];
-				$asic_chips[$x] = $json['stats'][0]['STATS'][1]["chain_acn$y"];
-				$asic_freq[$x]  = $json['stats'][0]['STATS'][1]["frequency$y"];
-				$asic_chain[$x] = $json['stats'][0]['STATS'][1]["chain_acs$y"];
-				$asic_power[$x] = $json['stats'][0]['STATS'][1]["watt$y"];
-                $asic_volt[$x]  = $json['stats'][0]['STATS'][1]["volt$y"];
-				$asic_hr[$x]    = $json['stats'][0]['STATS'][1]["chain_rate$y"];
-				$asic_hw[$x]    = $json['stats'][0]['STATS'][1]["chain_hw$y"];
-                        if ($asic_btemp[$x]>80) { $bcl[$x] = 'red';}
+    }
+    else {
+        for ($x=0;$x<4;$x++) { $y = 1 + $x;
+			$asic_btemp[$x] = $json['stats'][0]['STATS'][1]["temp$y"];
+			$ctemp[$x]      = $json['stats'][0]['STATS'][1]["temp2_$y"];
+			$asic_chips[$x] = $json['stats'][0]['STATS'][1]["chain_acn$y"];
+			$asic_freq[$x]  = $json['stats'][0]['STATS'][1]["frequency$y"];
+			$asic_chain[$x] = $json['stats'][0]['STATS'][1]["chain_acs$y"];
+			$asic_power[$x] = $json['stats'][0]['STATS'][1]["watt$y"];
+            $asic_volt[$x]  = $json['stats'][0]['STATS'][1]["volt$y"];
+			$asic_hr[$x]    = $json['stats'][0]['STATS'][1]["chain_rate$y"];
+			$asic_hw[$x]    = $json['stats'][0]['STATS'][1]["chain_hw$y"];
+			if ($asic_volt[$x] == 'lowest') { $asic_volt[$x] = 0; }
+            if (!$asic_hr[$x] or $asic_chips[$x] == 0) { $asic_power[$x] = 0; }
+			if ($asic_btemp[$x]>80) { $bcl[$x] = 'red';}
 			else if ($asic_btemp[$x]>70) { $bcl[$x] = 'orange';}
 			else if ($asic_btemp[$x]>65) { $bcl[$x] = 'yellow';}
 			else if ($asic_btemp[$x]>50) { $bcl[$x] = 'green';}
@@ -225,12 +227,13 @@ function miner_details($type,$id,$arr) {
 			else if ($ctemp[$x]>50) { $ccl[$x] = 'green';}
 			else 			{ $ccl[$x] = 'blue';}
 		}
-                $fan1           = $json['stats'][0]['STATS'][1]['fan1'];
-                $fan2           = $json['stats'][0]['STATS'][1]['fan2'];
+        $voltavg = round(array_sum($asic_volt)/4,2);
+        $fan1    = $json['stats'][0]['STATS'][1]['fan1'];
+        $fan2    = $json['stats'][0]['STATS'][1]['fan2'];
 		$asic_chip_sum = array_sum($asic_chips);
 		$freqavg = round(array_sum($asic_freq)/4);
 		if ($freqavg<1) {$freqavg = $freq;}
-                if ($ghs5s>650) {$thcl = 'greenlight';}
+		if ($ghs5s>650) {$thcl = 'greenlight';}
 		else if ($ghs5s>600) {$thcl = 'green';}
 		else if ($ghs5s>500) {$thcl = 'blue';}
 		else if ($ghs5s>450) {$thcl = 'yellow';}
@@ -245,12 +248,10 @@ function miner_details($type,$id,$arr) {
 	else if ($elapsed<3600*48)      {       $uptime = floor($elapsed/3600) . " H";  $upbox =' box blue';}
 	else                            {       $uptime = floor($elapsed/(3600*24)) . " days";  }
 
-	if (preg_match('/braiins/', $miner_type)) { $miner_type = 'Braiins OS';}
-	else if (preg_match('/vnish (.*)\)/', $miner_type, $vers)) {$miner_type = "ASICDIP $vers[1]";}
-        if ($hw > 100000) {     $hw = '<td class="hwred">' . number_format($hw);}
-        else                    {       $hw = "<td>" . number_format($hw);      }
-        if ($fan1 == 0) { $fan1 = $fan3; }
-        $rejrate = round((100*($rejected/$accepted)), 3);
+    if ($hw > 100000) {     $hw = '<td class="hwred">' . number_format($hw);}
+    else                    {       $hw = "<td>" . number_format($hw);      }
+    if ($fan1 == 0) { $fan1 = $fan3; }
+    $rejrate = round((100*($rejected/$accepted)), 3);
 	for ($x=0;$x<6;$x++) {
         	if ($pool_prio[$x] == 0 ) {$poolnum = $x;break;}
 	}
@@ -270,7 +271,7 @@ function miner_details($type,$id,$arr) {
     $difftotal = round($ghs5s - $hrate_ideal);
 	for ($i=0;$i<4;$i++)	{ 
 		$diff[$i] = round($asic_hr[$i] - $asic_hrideal[$i]);
-        	if ($diff[$i]>0) {$dfcol[$i]='green';}
+		if ($diff[$i]>0) {$dfcol[$i]='green';}
 		else if ($diff[$i] < -700) {$dfcol[$i]='red';}
 		else if ($diff[$i] < -200) {$dfcol[$i]='orange';}
 		else if ($diff[$i] < -50) {$dfcol[$i]='yellow';}
@@ -319,9 +320,9 @@ function miner_details($type,$id,$arr) {
 	$html = $headtbl ."<tr>
  		<td class=wid>$id</td>
  		<td>$model</td>
- 		<td class=type>$miner_type</td>
+ 		<td class=type>$fw_type</td>
  		<td class=miner>$miner_ver</td>
- 		<td><a href=\"http://$ip\" target=\"_blank\">$ip</a></td>
+ 		<td><a href=\"http://$ip\" target='_blank'>$ip</a></td>
  		<td>$pool_url_main</td>
  		<td class=wname>$pool_user[$poolnum]</td>
  		<td class=diff>$pool_diff[$poolnum]</td>
@@ -393,8 +394,8 @@ function miner_details($type,$id,$arr) {
 	else		{$z = 4;}
 	for ($i=0;$i<$z;$i++) {
 	
-		if ($asic_chips[$i]<63 && $miner_type != 'Antminer S9k') {$chpcol[$i] = 'red';}
-		else if ($asic_chips[$i]<60 && $miner_type == 'Antminer S9k') {$chpcol[$i] = 'red';}
+		if ($asic_chips[$i]<63 && $fw_type != 'S9K') {$chpcol[$i] = 'red';}
+		else if ($asic_chips[$i]<60 && $fw_type == 'S9K') {$chpcol[$i] = 'red';}
 		else {$chpcol[$i] = '';} 
 		$html .= "<tr><td>#".($i+6)."</td><td><span class=\"box $chpcol[$i]\">$asic_chips[$i]</span></td><td>$asic_freq[$i]</td><td>$asic_volt[$i]</td><td>$asic_power[$i]</td><td>".number_format($asic_hrideal[$i])."</td><td>".number_format($asic_hr[$i])."</td><td><span class=\"box $dfcol[$i]\">$diff[$i]</span></td><td>$asic_hw[$i]</td><td>$asic_chain[$i]</td><tr>";
         }
@@ -415,12 +416,12 @@ if ($_GET['id']) {
 	$id = $_GET['id'];
 	if ($type == 's9') {
 		$htm .= '<title>S9: '.$id.'</title></head><body>';
-		$jsonfile = file_get_contents('json/s9.json');
+		$jsonfile = file_get_contents($s9jsonfile);
 		$arr = json_decode($jsonfile,true);
 	}
 	else if ($type == 'l3') {
 		$htm .= '<title>L3: '.$id.'</title></head><body>';
-		$jsonfile = file_get_contents('json/l3.json');
+		$jsonfile = file_get_contents($l3jsonfile);
 		$arr = json_decode($jsonfile,true);
 
 	}
