@@ -32,6 +32,7 @@ root@raspberrypi:/var/www/html/# git clone https://github.com/alxkvx/miners-stat
 change owner of files to Apache user:
 ```
 root@raspberrypi:/var/www/html# chown -R www-data.www-data miners-stats/
+root@raspberrypi:/var/www/html# apt-get install libapache2-mod-php  // for debian/ubuntu
 ```
 Add your miners using **ADD** button on the page.
 
