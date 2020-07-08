@@ -1,6 +1,7 @@
 <?php
 
 error_reporting(E_ERROR | E_PARSE);
+require_once('files.php');
 
 $oct1 = $_GET['oct1'];
 $oct2 = $_GET['oct2'];
@@ -9,9 +10,9 @@ $oct4 = $_GET['oct4'];
 $oct4b = $_GET['oct4b'];
 $skip = $_GET['skip'];
 
-$s9list = json_decode(file_get_contents('json/s9list.json'),true);;
-$l3list = json_decode(file_get_contents('json/l3list.json'),true);;
-$s9and  = json_decode(file_get_contents('json/s9and.json'),true);;
+$s9list = json_decode(file_get_contents($s9jsonfile),true);
+$l3list = json_decode(file_get_contents($l3jsonfile),true);
+$s9and  = json_decode(file_get_contents($l3andjsonfile),true);
 
 $s9 = [];
 
