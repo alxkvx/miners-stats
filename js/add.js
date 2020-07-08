@@ -73,8 +73,16 @@ $(document).ready(function() {
 				else {type = 'l3';}
 				var	url = 'addsave.php?id='+id+'&type='+type+'&ip='+ip+'&model='+stype;
 
-				$.get(url, function(data){
-					$('body').append(data);
+				$.ajax({
+				    url : url,
+				    type : "get",
+				    async: false,
+				    success : function(data) {
+						$('body').append(data);
+				    },
+				    error: function() {
+				       connectionError();
+				    }
 				});
 			}
 		});
